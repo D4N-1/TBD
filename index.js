@@ -1,6 +1,6 @@
 import "dotenv/config"
 import express from "express"
-import configCatClient from "configcat-node"
+import configcat from "configcat-node"
 import path from "node:path"
 
 const app = express();
