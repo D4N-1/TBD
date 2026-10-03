@@ -1,7 +1,11 @@
-import "dotenv/config"
-import express from "express"
-import configcat from "configcat-node"
-import path from "node:path"
+import "dotenv/config";
+import express from "express";
+import * as configcat from "configcat-node";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,10 +19,12 @@ const configCatClient = configcat.getClient(
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Health check para Render
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', uptime: process.uptime() });
 });
 
+// Endpoint para consultar el estado del feature flag
 app.get('/api/features', async (req, res) => {
   try {
     const userId = req.headers['x-user-id'] || req.query.userId || 'anonymous-user';
@@ -42,4 +48,4 @@ if (process.env.NODE_ENV !== 'test') {
   });
 }
 
-module.exports = app;
+export default app;
