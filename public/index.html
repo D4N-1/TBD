@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard con Dark Mode Toggle</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <header class="header">
+      <h1>Panel de Métricas</h1>
+      <!-- El botón solo se mostrará si dark_mode_enabled está activo -->
+      <button id="themeToggleBtn" class="btn-toggle" style="display: none;">
+        🌙 Cambiar Tema
+      </button>
+    </header>
+
+    <main class="card">
+      <h2>Resumen de Operaciones</h2>
+      <p>Bienvenido al dashboard protegido con Feature Flags de ConfigCat.</p>
+    </main>
+  </div>
+
+  <script>
+    (async function initApp() {
+      // 1. Manejo de persistencia (Ticket 3)
+      const savedTheme = localStorage.getItem('user_theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      }
+
+      // 2. Consulta al backend si el flag está activo (Ticket 1 & 2)
+      try {
+        const userId = localStorage.getItem('app_user_id') || 'usr_' + Math.random().toString(36).substring(7);
+        localStorage.setItem('app_user_id', userId);
+
+        const res = await fetch(`/api/features?userId=${userId}`);
+        const data = await res.json();
+
+        if (data.darkModeEnabled) {
+          const toggleBtn = document.getElementById('themeToggleBtn');
+          toggleBtn.style.display = 'inline-block';
+
+          toggleBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            document.documentElement.setAttribute('data-theme', nextTheme);
+            localStorage.setItem('user_theme', nextTheme);
+          });
+        }
+      } catch (err) {
+        console.warn('No se pudo verificar el feature flag', err);
+      }
+    })();
+  </script>
+</body>
+</html>
